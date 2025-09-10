@@ -1,5 +1,11 @@
 version: 2
 
+#group:
+  #- name: sales
+    #owner:
+      #email: sales@my-company.com
+      #slack: sales-data
+      #github: sales-data-team 
 models:
   - name: dim_orders
     description: "Table of order level information"
@@ -11,7 +17,7 @@ models:
     # Private - only other models in the same (sales) group can ref() this model
     # Protected - only other models in the same group or project can ref() this model
     # Public - any other model can ref() this model
-    #access: private
+    #access: protected
 
     columns:
 
@@ -23,14 +29,11 @@ models:
         tests:
           # Generic test that we define in tests/generic/test_primary_key.sql
           # Takes arguments for model & column_name, both of which are automatically passed to it
-          #- primary_key:
-              #severity: error
-          - unique:
+          - primary_key:
               severity: error
           - relationships:
               to: ref('stg_ecommerce__orders')
               field: order_id
-              severity: error
 
       - name: order_created_at
         description: "When the order was created"
@@ -47,7 +50,7 @@ models:
       - name: order_status
         # Best practice would be to use doc() references for all common columns
         # However, for simplicity in this project we just use one
-        #description: "{{ doc('status') }}"
+        description: "{{ doc('status') }}"
 
       - name: num_items_ordered
         description: "Number of items in the order"
@@ -59,28 +62,28 @@ models:
         description: "Sum of item_sale_price for the whole order"
         tests:
           - not_null
-          #- dbt_expectations.expect_column_values_to_be_between:
-              #min_value: 0
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
           #- dbt_utils.expression_is_true:
-              #expression: "= total_sold_menswear + total_sold_womenswear"
+             # expression: "= total_sold_menswear + total_sold_womenswear"
 
       - name: total_product_cost
         description: "Sum of product_cost for the whole order"
         tests:
           - not_null
-          #- dbt_expectations.expect_column_values_to_be_between:
-              #min_value: 0
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
 
       - name: total_profit
         description: "Sum of (item_sale_price - product_cost) for the whole order"
         tests:
           - not_null
-          #- dbt_expectations.expect_column_values_to_be_between:
-              #min_value: 0
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
 
       - name: total_discount
         description: "Sum of (product_retail_price - item_sale_price) for the whole order"
         tests:
           - not_null
-          #- dbt_expectations.expect_column_values_to_be_between:
-              #min_value: 0
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
