@@ -8,10 +8,9 @@ order_item_measures AS(
         SUM(item_discount) AS total_discount,
         SUM(item_profit) AS total_profit,
 
-        {%- set department = ['Men', 'Women'] -%}
-        {%- for dept in department -%}
+        {% for dept in dbt_utils.get_column_values(table= ref('int_ecommerce__order_items_products'), column = 'product_department ') %}
         SUM(IF(product_department = '{{dept}}', item_sale_price, 0)) AS total_sold_{{dept.lower()}}swear{% if not loop.last %},{% endif -%}
-        {% endfor %}
+        {%- endfor %}
 
     FROM
         {{ ref('int_ecommerce__order_items_products') }} 
@@ -23,6 +22,7 @@ SELECT
     --Dimensions from orders staging table
     od.order_id,
     od.created_at AS order_created_at,
+    {{is_weekend('od.created_at')}} AS order_created_on_weekend,
     od.shipped_at AS order_shipped_at,
     od.delivered_at AS order_delivered_at,
     od.returned_at AS order_returned_at,
@@ -36,6 +36,11 @@ SELECT
     om.total_profit,
     om.total_discount,
 
+    {% for dept in dbt_utils.get_column_values(table= ref('int_ecommerce__order_items_products'), column = 'product_department ')%}
+    total_sold_{{dept.lower()}}swear{% if not loop.last %},{% endif -%}
+    {% endfor %}
+
+    --Days since first order
     TIMESTAMP_DIFF(od.created_at, fo.first_order_created, DAY) AS days_since_first_order
 FROM
     {{ ref('stg_ecommerce__orders') }} AS od

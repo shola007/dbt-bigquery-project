@@ -30,6 +30,9 @@ clean-targets:         # directories to be removed by `dbt clean`
 # directory as views. These settings can be overridden in the individual model
 # files using the `{{ config(...) }}` macro.
 
+on-run-start:
+  - "{{ get_brand_name() }}"
+  
 models:
   bq_project:
     +materialized: table
@@ -38,6 +41,7 @@ models:
         columns: true
     #Tables will delete after 168hours(7 days) to creation
     +hours_to_expiration: 168
+    
   
 tests:
   bq_project:

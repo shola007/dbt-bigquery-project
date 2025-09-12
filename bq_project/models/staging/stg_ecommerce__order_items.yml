@@ -1,3 +1,5 @@
+version: 2
+
 models:
   - name: stg_ecommerce__order_items
     description: "Line items for the orders"
